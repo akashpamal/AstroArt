@@ -1,0 +1,15 @@
+
+
+# Goals:
+# - Generate Planets from array of (location, mass, size)
+# - Save picture from pygame
+# - Find planet colors with KMeans -- explain later too
+# - Generate 10,000 samples
+
+# - Train the CNN with outcomes
+# - Test with new Pictures
+
+# 
+# 
+
+#--------------------------------------------
