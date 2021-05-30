@@ -32,13 +32,10 @@ MASS_AREA_RATIO = 2 * (10 ** 9)  # mass in kilograms to area in pixels
 planet_list = []
 planet_id = 0
 
-NUM_PLANETS = 5
+NUM_PLANETS = 30
 IMAGE = "./input_images/DABABY CAR LESSS GOOOOOO.jpeg"
 img = Image.open(IMAGE)
-# colors = kMeans_quantization(img, NUM_PLANETS)
-#colors = ((100, 100, 0), (255, 0, 255), (100, 255, 255), (0, 255, 0))
-# colors = [(243, 243, 244), (197, 89, 32), (148, 152, 164), (63, 27, 17), (209, 109, 47), (159, 61, 30), (58, 66, 82), (224, 161, 113), (39, 48, 62), (209, 179, 168), (165, 83, 56), (135, 46, 20), (87, 94, 109), (25, 26, 35), (137, 63, 47), (145, 91, 79), (215, 214, 219), (212, 123, 72), (48, 32, 37), (105, 58, 50), (7, 7, 15), (114, 121, 137), (179, 72, 32), (216, 138, 93), (188, 93, 51), (176, 183, 197), (79, 45, 41), (172, 125, 112), (103, 36, 17), (195, 107, 69)]
-colors = [(random.random() * 255, random.random() * 255, random.random() * 255) for i in range(5)]
+colors = [(random.random() * 255, random.random() * 255, random.random() * 255) for i in range(100)]
 
 class Planet:
     def __init__(self, vel_x, vel_y, x, y, radius, id, color=[255, 0, 0]):
