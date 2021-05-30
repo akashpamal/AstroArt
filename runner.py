@@ -3,7 +3,6 @@ import sys
 import random
 import math
 import copy
-import numpy as np
 from pygame.locals import KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, QUIT
 from PIL import Image
 import json
@@ -12,14 +11,13 @@ import multiprocessing
 from kmeansIdentifier import kMeans_quantization
 from saving import Saver
 
-FPS = 120
+FPS = 240
 WINDOW_TOLERANCE = 25
 WINDOW_SIZE = (1440, 800)
 
 G = 6.67408 * (10 ** -11)  # Gravitational Constant
 MASS_AREA_RATIO = 2 * (10 ** 9)  # mass in kilograms to area in pixels
-NUM_PLANETS = 60
-
+NUM_PLANETS = 45
 
 class Planet:
     def __init__(self, vel_x, vel_y, x, y, radius, id, color=[255, 0, 0]):
@@ -86,6 +84,7 @@ def run_simulation(number):
     pg.init()
     CLOCK = pg.time.Clock()
     pg.display.set_caption("Astro-Art Animator")
+    
     kmeans = False
     image = None
     if kmeans:
@@ -106,9 +105,8 @@ def run_simulation(number):
     screen_rect = screen.get_rect()
     display = pg.Surface(WINDOW_SIZE)
     display_rect = display.get_rect()
-
     planet_list = []
-
+    screen.fill([0, 0, 0])
 
     for num, item in enumerate(colors):
         planet_list.append(Planet(random.random()-0.5, random.random()-0.5, random.random() * WINDOW_SIZE[0], random.random() * WINDOW_SIZE[1], random.random() * 5, num, color=item))
@@ -117,7 +115,6 @@ def run_simulation(number):
         
     running = True
     while running:
-        # screen.fill([0, 0, 0])
         for event in pg.event.get():
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_q:
@@ -126,23 +123,24 @@ def run_simulation(number):
         for planet in planet_list:
             if planet.x > WINDOW_SIZE[0] + WINDOW_TOLERANCE or planet.x < -WINDOW_TOLERANCE:
                 planet_list.remove(planet)
-                print(len(planet_list))
+                print(number, len(planet_list))
             elif planet.y > WINDOW_SIZE[1] + WINDOW_TOLERANCE or planet.y < -WINDOW_TOLERANCE:
                 planet_list.remove(planet)
-                print(len(planet_list))
+                print(number, len(planet_list))
             elif planet.velocity[0] > 100 or planet.velocity[0] < -100:
                 planet_list.remove(planet)
-                print(len(planet_list))
+                print(number, len(planet_list))
             elif planet.velocity[1] > 100 or planet.velocity[1] < -100:
                 planet_list.remove(planet)
-                print(len(planet_list))
+                print(number, len(planet_list))
             # elif (planet.velocity[0] ** 2 + planet.velocity[1] ** 2) ** 0.5 < 0.001:
             #     planet_list.remove(planet)
             #     print(len(planet_list))
                 
         if len(planet_list) == 0:
             saver.save_data()
-            quit()
+            screen.fill([0, 0, 0])
+            return
             
         for planet in planet_list:
             planet.update()
@@ -154,7 +152,7 @@ def run_simulation(number):
 
 
 if __name__ == '__main__':
-    NUM_PROCESSES = None
+    NUM_PROCESSES = 6
     save_file_numbers = [(elem, ) for elem in range(100)]
     if NUM_PROCESSES is None:
         with multiprocessing.Pool() as pool:
