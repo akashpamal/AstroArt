@@ -34,7 +34,6 @@ def kMeans_quantization(image, colors = 8):
         print("Generation", gen, "-->", difference)
         prev_population = population
         
-        #4
         new_means = []
         for mean in means:
             red = 0
@@ -54,8 +53,6 @@ def kMeans_quantization(image, colors = 8):
         print(new_means)
         gen += 1
     
-    print("Final Means:", new_means)
-    print("Saving...")
     for x in range(image.width):
         for y in range(image.height):
             min_group = None
@@ -69,7 +66,7 @@ def kMeans_quantization(image, colors = 8):
             
             pixels[x, y] = min_group
             
-    return new_means
+    return image, new_means
 
 def random_pixels(pixels, image, count):
     output = []
