@@ -1,5 +1,5 @@
 #TODO: make sun-sun interaction only
-#TODO: make mass and size not interdependent
+#TODO: discuss collision number
 
 import pygame as pg
 import sys
@@ -21,8 +21,8 @@ MASS_AREA_RATIO = 2 * (10 ** 9)  # mass in kilograms to area in pixels
 
 
 class Planet:
-    #Planet Class provided by https://github.com/000Nobody/Orbit-Simulator 
-    def __init__(self, vel_x, vel_y, x, y, radius, id, color = (255, 0, 0)):
+    #Planet Class basis provided by https://github.com/000Nobody/Orbit-Simulator 
+    def __init__(self, vel_x, vel_y, x, y, radius, id, color = (255, 0, 0), disp_size = None):
         self.x = x
         self.y = y
         self.radius = radius
@@ -39,10 +39,14 @@ class Planet:
         self.color = color
         self.planet_list = planet_list
         self.screen = screen
+        self.crashes = 0
+        if disp_size is None:
+            self.disp_size = radius
+        else:
+            self.disp_size = disp_size
         
     def update(self):
         self.getVelocity()
-        self.collision()
         self.rect = pg.Rect(
             self.x - self.radius / 1.5,
             self.y - self.radius / 1.5,
@@ -59,29 +63,30 @@ class Planet:
                 dy = planet.y - self.y
                 angle = math.atan2(dy, dx)  # Calculate angle between planets
                 d = math.sqrt((dx ** 2) + (dy ** 2))  # Calculate distance
-                if d == 0:
-                    d = 0.00000000000000000001  # Prevent division by zero error
-                f = (
-                    G * self.mass * planet.mass / (d ** 2)
-                )  # Calculate gravitational force
+                if d < (planet.disp_size + self.disp_size):
+                    vel_x = (planet.velocity[0] + self.velocity[0])/5
+                    vel_y = (planet.velocity[1] + self.velocity[1])/5
+
+                    if (planet.disp_size <= self.disp_size):
+                        planet_list.remove(planet)
+                        self.crashes += 1
+                        self.velocity[0] = vel_x
+                        self.velocity[1] = vel_y
+                    else:
+                        planet_list.remove(self)
+                        planet.crashes += 1
+                        planet.velocity[0] = vel_x
+                        planet.velocity[1] = vel_y
+                else:
+                    f = G * self.mass * planet.mass / (d ** 2) # Calculate gravitational force
+                    self.velocity[0] += (math.cos(angle) * f) / self.mass
+                    self.velocity[1] += (math.sin(angle) * f) / self.mass
                 
-                self.velocity[0] += (math.cos(angle) * f) / self.mass
-                self.velocity[1] += (math.sin(angle) * f) / self.mass
-                
-    def collision(self):
-        for planet in self.planet_list:
-            if (
-                self.id != planet.id
-                and self.rect.colliderect(planet.rect)
-                and self.mass > planet.mass
-            ):
-                self.planet_list.remove(planet)
-                if self.radius <= 200:
-                    self.volume += planet.volume
-                    self.radius = self.volume ** (1. /3.)
+                if planet.crashes > 4:
+                    planet_list.remove(planet)
 
     def draw(self):
-        pg.draw.circle(self.screen, self.color, (int(self.x), int(self.y)), int(self.radius))
+        pg.draw.circle(self.screen, self.color, (int(self.x), int(self.y)), int(self.disp_size))
         
 def run_simulation(number):
     pg.init()
@@ -109,15 +114,15 @@ def run_simulation(number):
         colors = [(random.random() * 255, random.random() * 255, random.random() * 255) for i in range(max_planets)]
 
     # # LOADING A JSON FILE
-    # with open('./training_data/69696420.json', 'r') as data: 
+    # with open('./training_data/test_file.json', 'r') as data: 
     #     init_conds = json.load(data)
 
     # for num, planet in enumerate(init_conds.values()):
     #     planet_list.append(Planet(vel_x = planet[0], vel_y = planet[1], x = planet[2], y = planet[3], radius = planet[4], id = num, color = planet[5]))
 
-    # RANDOM GENERATION
-    # for num, item in enumerate(colors):
-    #     planet_list.append(Planet(random.random()-0.5, random.random()-0.5, random.random() * WINDOW_SIZE[0], random.random() * WINDOW_SIZE[1], random.random() * 5, num, color=item))
+    # # RANDOM GENERATION
+    for num, item in enumerate(colors):
+        planet_list.append(Planet(random.random()-0.5, random.random()-0.5, random.random() * WINDOW_SIZE[0], random.random() * WINDOW_SIZE[1], random.random() * 5, num, color=item, disp_size = 3))
     
     # # SOLAR SYSTEM 3 BODY - NO INTERACTION
     # planet_list.append(Planet(0, 0, 750, 400, 55, 1, (255, 255, 0))) #sun
@@ -126,17 +131,17 @@ def run_simulation(number):
     # planet_list.append(Planet(0, -2, 1030, 400, 1, 4)) #red
 
     # # BINARY STAR SYSTEM
-    planet_list.append(Planet(0.2, -0.8, 900, 400, 20, 1, (255, 255, 255))) #sun - yellow
-    planet_list.append(Planet(-0.2, 0.8, 740, 400, 20, 2, (255, 255, 0))) #sun - yellow
-    planet_list.append(Planet(0.4, -0.3, 1240, 730, 2, 3)) #planet - red
-    planet_list.append(Planet(0.4, -0.5, 240, 230, 1, 4)) #planet - red 
+    # planet_list.append(Planet(0.2, -0.8, 900, 400, 20, 1, (255, 255, 255), disp_size = 30)) #sun - yellow
+    # planet_list.append(Planet(-0.2, 0.8, 740, 400, 20, 2, (255, 255, 0), disp_size = 30)) #sun - yellow
+    # planet_list.append(Planet(0.4, -0.3, 1240, 730, 2, 3, disp_size = 10)) #planet - red
+    # planet_list.append(Planet(0.4, -0.5, 240, 230, 1, 4, disp_size = 8)) #planet - red 
     
     planet_info = [(item.velocity[0], item.velocity[1], item.x, item.y, item.radius, (item.color[0], item.color[1], item.color[2])) for item in planet_list] #pg.Surface pickle problem avoided
     saver = Saver(number, screen, planet_info)
 
     running = True
     while running:
-        screen.fill(BG_COLOR) #NOTE: comment out to add orbits
+        # screen.fill(BG_COLOR) #NOTE: comment out to add orbits
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
