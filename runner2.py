@@ -1,5 +1,4 @@
-#TODO: make sun-sun interaction only
-#TODO: discuss collision number
+#TODO: make sun-sun interaction only -- class based system or no?
 
 import pygame as pg
 import sys
@@ -22,17 +21,11 @@ MASS_AREA_RATIO = 2 * (10 ** 9)  # mass in kilograms to area in pixels
 
 class Planet:
     #Planet Class basis provided by https://github.com/000Nobody/Orbit-Simulator 
-    def __init__(self, vel_x, vel_y, x, y, radius, id, color = (255, 0, 0), disp_size = None):
+    def __init__(self, vel_x, vel_y, x, y, radius, id, color = (255, 0, 0), disp_size = None, type = "planet"):
         self.x = x
         self.y = y
         self.radius = radius
         self.volume = self.radius ** 3
-        self.rect = pg.Rect(
-            self.x - self.radius / 1.5,
-            self.y - self.radius / 1.5,
-            self.radius * 1.5,
-            self.radius * 1.5,
-        )
         self.mass = math.pi * (self.radius ** 2) * MASS_AREA_RATIO
         self.id = id
         self.velocity = [vel_x, vel_y]
@@ -40,21 +33,17 @@ class Planet:
         self.planet_list = planet_list
         self.screen = screen
         self.crashes = 0
+        self.type = type
         if disp_size is None:
             self.disp_size = radius
         else:
             self.disp_size = disp_size
         
     def update(self):
-        self.getVelocity()
-        self.rect = pg.Rect(
-            self.x - self.radius / 1.5,
-            self.y - self.radius / 1.5,
-            self.radius * 1.5,
-            self.radius * 1.5,
-        )
-        self.x += self.velocity[0]
-        self.y += self.velocity[1]
+        if self.type == "planet":
+            self.getVelocity()
+            self.x += self.velocity[0]
+            self.y += self.velocity[1]
         
     def getVelocity(self):
         for planet in self.planet_list:
@@ -64,8 +53,11 @@ class Planet:
                 angle = math.atan2(dy, dx)  # Calculate angle between planets
                 d = math.sqrt((dx ** 2) + (dy ** 2))  # Calculate distance
                 if d < (planet.disp_size + self.disp_size):
-                    vel_x = (planet.velocity[0] + self.velocity[0])/5
-                    vel_y = (planet.velocity[1] + self.velocity[1])/5
+                    vel_x = ((self.mass * self.velocity[0]) + (planet.mass * planet.velocity[0]))/((self.mass + planet.mass)/1.3)
+                    vel_y = ((self.mass * self.velocity[1]) + (planet.mass * planet.velocity[1]))/((self.mass + planet.mass)/1.3)
+
+                    # vel_x = (planet.velocity[0] + self.velocity[0])/5
+                    # vel_y = (planet.velocity[1] + self.velocity[1])/5
 
                     if (planet.disp_size <= self.disp_size):
                         planet_list.remove(planet)
@@ -82,7 +74,7 @@ class Planet:
                     self.velocity[0] += (math.cos(angle) * f) / self.mass
                     self.velocity[1] += (math.sin(angle) * f) / self.mass
                 
-                if planet.crashes > 4:
+                if planet.crashes > 10:
                     planet_list.remove(planet)
 
     def draw(self):
@@ -101,7 +93,7 @@ def run_simulation(number):
     # display = pg.Surface(WINDOW_SIZE)
     # display_rect = display.get_rect()
     planet_list = []
-    max_planets = 64
+    max_planets = 100
     screen.fill(BG_COLOR)
 
     kmeans = False
@@ -114,7 +106,7 @@ def run_simulation(number):
         colors = [(random.random() * 255, random.random() * 255, random.random() * 255) for i in range(max_planets)]
 
     # # LOADING A JSON FILE
-    # with open('./training_data/test_file.json', 'r') as data: 
+    # with open('./training_data/laser.json', 'r') as data: 
     #     init_conds = json.load(data)
 
     # for num, planet in enumerate(init_conds.values()):
@@ -122,19 +114,32 @@ def run_simulation(number):
 
     # # RANDOM GENERATION
     for num, item in enumerate(colors):
-        planet_list.append(Planet(random.random()-0.5, random.random()-0.5, random.random() * WINDOW_SIZE[0], random.random() * WINDOW_SIZE[1], random.random() * 5, num, color=item, disp_size = 3))
-    
+        planet_list.append(Planet(random.random()-0.5, random.random()-0.5, random.random() * WINDOW_SIZE[0], random.random() * WINDOW_SIZE[1], random.random() * 10, num, color=item, disp_size = 3))
+
     # # SOLAR SYSTEM 3 BODY - NO INTERACTION
-    # planet_list.append(Planet(0, 0, 750, 400, 55, 1, (255, 255, 0))) #sun
-    # planet_list.append(Planet(0, 2, 950, 400, 4, 2, (0, 255, 0))) #green
-    # planet_list.append(Planet(0, -2, 420, 400, 3, 3, (0, 0, 255))) #blue
-    # planet_list.append(Planet(0, -2, 1030, 400, 1, 4)) #red
+    # planet_list.append(Planet(0, 0, 750, 400, 55, 1, (255, 255, 0), type="star")) #sun
+    # planet_list.append(Planet(0, 2, 950, 400, 4, 2, (0, 255, 0), disp_size=10)) #green
+    # planet_list.append(Planet(0, -2, 420, 400, 3, 3, (0, 0, 255), disp_size=5)) #blue
+    # planet_list.append(Planet(0, -2, 1030, 400, 1, 4, disp_size=4)) #red
+    
+    
+    # # SOLAR SYSTEM 3 BODY - INTERACTION UNSTABLE
+    # planet_list.append(Planet(0, 0, 750, 400, 50, 1, (255, 255, 0), type="star")) #sun
+    # planet_list.append(Planet(1.5, 0.1, 750, 50, 15, 2, (0, 255, 0))) #green
+    # planet_list.append(Planet(0.2, 2, 550, 400, 20, 3, (0, 0, 255), disp_size=10)) #blue
+    # planet_list.append(Planet(0.1, -1, 270, 600, 4, 4)) #red
+
+    # # SOLAR SYSTEM 3 BODY - INTERACTION STABLE
+    # planet_list.append(Planet(0, 0, 750, 400, 50, 1, (255, 255, 0), type="star")) #sun
+    # planet_list.append(Planet(1.7, 0, 750, 100, 10, 2, (0, 255, 0))) #green
+    # planet_list.append(Planet(-2.5, 0, 750, 600, 15, 3, (0, 0, 255), disp_size=10)) #blue
+    # planet_list.append(Planet(0.8, -2, 575, 400, 5, 4)) #red
 
     # # BINARY STAR SYSTEM
     # planet_list.append(Planet(0.2, -0.8, 900, 400, 20, 1, (255, 255, 255), disp_size = 30)) #sun - yellow
     # planet_list.append(Planet(-0.2, 0.8, 740, 400, 20, 2, (255, 255, 0), disp_size = 30)) #sun - yellow
     # planet_list.append(Planet(0.4, -0.3, 1240, 730, 2, 3, disp_size = 10)) #planet - red
-    # planet_list.append(Planet(0.4, -0.5, 240, 230, 1, 4, disp_size = 8)) #planet - red 
+    # planet_list.append(Planet(0.4, -0.5, 240, 230, 1, 3, disp_size = 8)) #planet - red 
     
     planet_info = [(item.velocity[0], item.velocity[1], item.x, item.y, item.radius, (item.color[0], item.color[1], item.color[2])) for item in planet_list] #pg.Surface pickle problem avoided
     saver = Saver(number, screen, planet_info)
@@ -149,16 +154,16 @@ def run_simulation(number):
         for planet in planet_list:
             if planet.x > WINDOW_SIZE[0] + WINDOW_TOLERANCE or planet.x < -WINDOW_TOLERANCE:
                 planet_list.remove(planet)
-                print(number, len(planet_list))
+                # print(number, len(planet_list))
             elif planet.y > WINDOW_SIZE[1] + WINDOW_TOLERANCE or planet.y < -WINDOW_TOLERANCE:
                 planet_list.remove(planet)
-                print(number, len(planet_list))
-            elif planet.velocity[0] > 100 or planet.velocity[0] < -100:
+                # print(number, len(planet_list))
+            elif planet.velocity[0] > 50 or planet.velocity[0] < -50:
                 planet_list.remove(planet)
-                print(number, len(planet_list))
-            elif planet.velocity[1] > 100 or planet.velocity[1] < -100:
+                # print(number, len(planet_list))
+            elif planet.velocity[1] > 50 or planet.velocity[1] < -50:
                 planet_list.remove(planet)
-                print(number, len(planet_list))
+                # print(number, len(planet_list))
             # elif (planet.velocity[0] ** 2 + planet.velocity[1] ** 2) ** 0.5 < 0.001:
             #     planet_list.remove(planet)
             #     print(number, len(planet_list))
