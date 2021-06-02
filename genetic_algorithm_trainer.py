@@ -173,31 +173,7 @@ def genetic_algorithm_search():
         print('Generation:', generation_count)
         print('Best strategy so far:', max(generation))
         print('Time taken up to this generation ', generation_count, ': ', total_time_taken, ' seconds', sep='')
-    elif do_next == 'LT':
-        filename = input('What filename? ')
-        generation, generation_count, total_time_taken = pickle.load(open(filename, "rb" ))
-        print('Average:', sum([elem[0] for elem in generation]) / len(generation))
-        print('Generation:', generation_count)
-        print('Best strategy so far:', max(generation))
-        print('Time taken up to this generation ', generation_count, ': ', total_time_taken, ' seconds', sep='')
-        games = []
-        while True:
-            games.append(play_game(generation[0][1], orientation_to_metadata, orientation_to_pieces, all_orientations))
-            print('Running average:', sum(games) / len(games))
-    elif do_next == 'LM':
-        filename = input('What filename? ')
-        generation, generation_count, total_time_taken = pickle.load(open(filename, "rb" ))
-        print('Average:', sum([elem[0] for elem in generation]) / len(generation))
-        print('Generation:', generation_count)
-        print('Best strategy so far:', max(generation))
-        print('Time taken up to this generation ', generation_count, ': ', total_time_taken, ' seconds', sep='')
-        max_score = 0
-        for i in range(100):
-            result = play_game(generation[0][1], orientation_to_metadata, orientation_to_pieces, all_orientations)
-            max_score = max((result, max_score))
-            print('Game score:', result)
-            print('Max score so far:', max_score)
-            print()
+    
 
     if len(sys.argv) > 1:
         directory = sys.argv[1]
@@ -289,13 +265,12 @@ NUM_CORES_TO_USE = None # if this is None, use all available cores. Otherwise, u
 
 # CONFIGURE PLAY GAME
 def play_game(strategy, orientation_to_metadata, orientation_to_pieces, all_orientations, display_output=False):
-    # return play_game_unlimited(strategy, orientation_to_metadata, orientation_to_pieces, all_orientations, display_output)
-    return play_game_restricted(strategy, orientation_to_metadata, orientation_to_pieces, all_orientations, display_output)
+    pass
+
 
 # CONFIGURE FITNESS FUNCTION
 def fitness_function(strategy, strategy_number=None):
-    orbit_image = Runner(generation)
-    return 1 / error()
+    pass
 
 
 def main():
