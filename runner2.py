@@ -1,4 +1,5 @@
 #TODO: make sun-sun interaction only -- class based system or no?
+#SUB TODO: make somewhat accurate scaling
 
 import pygame as pg
 import sys
@@ -13,7 +14,7 @@ import multiprocessing
 from kmeansIdentifier import kMeans_quantization
 from saving import Saver
 
-FPS = 240
+FPS = 1280
 WINDOW_TOLERANCE = 25
 G = 6.67408 * (10 ** -11)  # Gravitational Constant
 MASS_AREA_RATIO = 2 * (10 ** 9)  # mass in kilograms to area in pixels
@@ -106,11 +107,11 @@ def run_simulation(number):
         colors = [(random.random() * 255, random.random() * 255, random.random() * 255) for i in range(max_planets)]
 
     # # LOADING A JSON FILE
-    # with open('./training_data/laser.json', 'r') as data: 
+    # with open('./training_data/test_file.json', 'r') as data: 
     #     init_conds = json.load(data)
 
     # for num, planet in enumerate(init_conds.values()):
-    #     planet_list.append(Planet(vel_x = planet[0], vel_y = planet[1], x = planet[2], y = planet[3], radius = planet[4], id = num, color = planet[5]))
+    #     planet_list.append(Planet(planet[0], planet[1], planet[2], planet[3], planet[4], num, color = planet[5], disp_size = 3))
 
     # # RANDOM GENERATION
     for num, item in enumerate(colors):
@@ -140,6 +141,12 @@ def run_simulation(number):
     # planet_list.append(Planet(-0.2, 0.8, 740, 400, 20, 2, (255, 255, 0), disp_size = 30)) #sun - yellow
     # planet_list.append(Planet(0.4, -0.3, 1240, 730, 2, 3, disp_size = 10)) #planet - red
     # planet_list.append(Planet(0.4, -0.5, 240, 230, 1, 3, disp_size = 8)) #planet - red 
+
+    # # TEST CODE
+    # planet_list.append(Planet(0.01, 0, 750, 400, 1000, 1, (255, 255, 255), disp_size=4, type = "star"))
+    # planet_list.append(Planet(0, 40, 450, 400, 5, 2, disp_size=10))
+    # planet_list.append(Planet(0, -48, 950, 400, 10, 3, color = (255, 255, 0), disp_size=10))
+    
     
     planet_info = [(item.velocity[0], item.velocity[1], item.x, item.y, item.radius, (item.color[0], item.color[1], item.color[2])) for item in planet_list] #pg.Surface pickle problem avoided
     saver = Saver(number, screen, planet_info)
